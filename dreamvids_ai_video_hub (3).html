@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DreamVids AI Video Hub — Free AI Video Generators</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'monospace']
+          },
+          colors: {
+            brand: {
+              400: '#a78bfa',
+              500: '#8b5cf6',
+              600: '#7c3aed',
+              pink: '#ec4899',
+              cyan: '#06b6d4'
+            },
+            dark: {
+              950: '#030712',
+              900: '#0b0f19',
+              850: '#111827',
+              800: '#1f2937',
+              700: '#374151'
+            }
+          },
+          animation: {
+            'glow-pulse': 'glowPulse 6s ease-in-out infinite',
+            'float': 'float 4s ease-in-out infinite'
+          },
+          keyframes: {
+            glowPulse: {
+              '0%, 100%': { opacity: '0.22', transform: 'scale(1)' },
+              '50%': { opacity: '0.50', transform: 'scale(1.08)' }
+            },
+            float: {
+              '0%, 100%': { transform: 'translateY(0px)' },
+              '50%': { transform: 'translateY(-5px)' }
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    body {
+      background-color: #030712;
+      color: #f3f4f6;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+    }
+    .glass-card {
+      background: rgba(17, 24, 39, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    .glass-card-glow {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 0.12), rgba(236, 72, 153, 0.08), rgba(6, 182, 212, 0.06));
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(139, 92, 246, 0.35);
+    }
+    .glass-card-unlocked {
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(6, 182, 212, 0.05));
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+    .glass-input {
+      background: rgba(11, 15, 25, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      transition: all 0.2s ease;
+    }
+    .glass-input:focus {
+      border-color: #8b5cf6;
+      box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.25);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 5px;
+      height: 5px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #0b0f19;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #374151;
+      border-radius: 9999px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-purple-600 selection:text-white">
+
+
+  <!-- Ambient background glow elements -->
+  <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+    <div class="absolute -top-32 left-1/4 w-[520px] h-[520px] bg-purple-600/20 rounded-full blur-[140px] animate-glow-pulse"></div>
+    <div class="absolute top-1/3 -right-24 w-[420px] h-[420px] bg-pink-600/15 rounded-full blur-[130px]"></div>
+    <div class="absolute -bottom-20 left-10 w-[450px] h-[450px] bg-cyan-600/10 rounded-full blur-[140px]"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="relative z-20 border-b border-white/10 bg-dark-950/80 backdrop-blur-xl sticky top-0 px-4 sm:px-8 py-3.5 transition-all">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      
+      <!-- Logo Branding -->
+      <div class="flex items-center space-x-3 cursor-pointer group" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-purple-600 via-pink-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-purple-600/30 group-hover:scale-105 transition transform">
+          <i data-lucide="video" class="w-5 h-5 text-white"></i>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl font-extrabold tracking-tight text-white">DreamVids<span class="text-brand-400">.hub</span></span>
+            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">Free Access</span>
+          </div>
+          <p class="text-[10px] text-gray-400 font-medium">Free AI Video Generation Web Hub</p>
+        </div>
+      </div>
+
+      <!-- Right Header Actions -->
+      <div class="flex items-center gap-3">
+        <!-- Credit Pill -->
+        <div id="creditPill" class="hidden items-center gap-2 px-3 py-1.5 rounded-full bg-dark-850 border border-white/10 text-xs font-semibold shadow-inner">
+          <span id="creditDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+          <span class="text-gray-300 hidden sm:inline">Free Pass:</span>
+          <span id="creditBadgeNumber" class="text-purple-400 font-bold font-mono">1/1 Remaining</span>
+        </div>
+
+        <div id="headerAuthSlot" class="flex items-center"></div>
+      </div>
+    </div>
+  </header>
+
+
+  <!-- Notification Toast Container -->
+  <div id="toastZone" class="fixed top-20 right-4 z-50 flex flex-col gap-2 pointer-events-none max-w-sm w-full"></div>
+
+  <!-- User Account & Privacy Modal -->
+  <div id="userModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md hidden opacity-0 transition-opacity duration-200">
+    <div class="bg-dark-900 border border-white/10 rounded-3xl p-6 sm:p-7 w-full max-w-md shadow-2xl relative text-left">
+      <button onclick="toggleUserModal(false)" class="absolute top-4 right-4 text-gray-400 hover:text-white p-1.5 rounded-xl hover:bg-white/5 transition">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+
+      <div class="flex items-center space-x-3.5 mb-6">
+        <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-purple-600 to-pink-600 p-0.5">
+          <div class="w-full h-full bg-dark-900 rounded-[14px] flex items-center justify-center font-extrabold text-xl text-purple-300" id="modalAvatarLetter">
+            D
+          </div>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-white leading-tight" id="modalUserName">Subscriber User</h3>
+          <p class="text-xs text-gray-400 font-mono" id="modalUserEmail">creator@studio.com</p>
+          <span class="inline-flex items-center gap-1 text-[11px] text-emerald-400 font-semibold mt-1" id="modalSubStatus">
+            <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Verified Channel Subscriber
+          </span>
+        </div>
+      </div>
+
+      <div class="space-y-2.5 mb-6 text-xs">
+        <div class="bg-dark-850 p-3 rounded-xl border border-white/5 flex items-center justify-between">
+          <span class="text-gray-400">Free Video Quota:</span>
+          <span class="font-bold text-purple-400 font-mono" id="modalQuotaText">1 / 1 Generation</span>
+        </div>
+        <div class="bg-dark-850 p-3 rounded-xl border border-white/5 flex items-center justify-between">
+          <span class="text-gray-400">YouTube Subscription:</span>
+          <span class="font-semibold text-emerald-400 flex items-center gap-1" id="modalSubscribedTag">
+            <i data-lucide="check" class="w-3.5 h-3.5"></i> Unlocked
+          </span>
+        </div>
+      </div>
+
+      <!-- Account Deletion Action -->
+      <div class="pt-5 border-t border-red-500/20">
+        <div class="flex items-center gap-2 mb-2 text-red-400 font-semibold text-xs tracking-wide">
+          <i data-lucide="trash-2" class="w-4 h-4"></i> Danger Zone
+        </div>
+        <p class="text-xs text-gray-400 mb-4 leading-relaxed">
+          Need to delete your account or wipe your session data? You can permanently delete your credentials and reset your access in one click.
+        </p>
+        <button onclick="promptDeleteAccount()" class="w-full py-2.5 px-4 rounded-xl bg-red-950/40 hover:bg-red-900/50 text-red-300 hover:text-red-200 border border-red-800/40 font-semibold text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-red-950/40">
+          <i data-lucide="user-x" class="w-4 h-4"></i> Delete My Account & Wipe Data
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirmation Dialog -->
+  <div id="deleteConfirmDialog" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md hidden opacity-0 transition-opacity duration-200">
+    <div class="bg-dark-900 border border-red-500/30 rounded-3xl p-6 w-full max-w-sm shadow-2xl text-center">
+      <div class="w-12 h-12 rounded-2xl bg-red-600/10 border border-red-500/20 text-red-400 flex items-center justify-center mx-auto mb-3">
+        <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+      </div>
+      <h3 class="text-base font-bold text-white mb-1">Delete Account & Reset Access?</h3>
+      <p class="text-xs text-gray-400 mb-5 leading-relaxed">
+        This permanently clears your credentials and resets your subscription verification in this browser.
+      </p>
+      <div class="flex gap-2">
+        <button onclick="toggleDeleteConfirm(false)" class="flex-1 py-2.5 rounded-xl bg-dark-800 hover:bg-dark-700 text-gray-300 text-xs font-semibold transition">Cancel</button>
+        <button onclick="performFullAccountDeletion()" class="flex-1 py-2.5 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-bold transition shadow-lg shadow-red-600/30">Yes, Delete</button>
+      </div>
+    </div>
+  </div>
+
+
+  <main class="relative z-10 flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
+
+    <!-- SIGN-IN SCREEN -->
+    <div id="authScreen" class="max-w-md mx-auto py-10 sm:py-16">
+      <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-2xl border border-white/10 relative overflow-hidden">
+        
+        <div class="text-center mb-6">
+          <div class="w-14 h-14 mx-auto rounded-2xl bg-gradient-to-tr from-purple-600 via-pink-600 to-indigo-600 p-0.5 shadow-xl shadow-purple-600/20 mb-4 animate-float">
+            <div class="w-full h-full bg-dark-900 rounded-[14px] flex items-center justify-center">
+              <i data-lucide="film" class="w-7 h-7 text-purple-400"></i>
+            </div>
+          </div>
+          <h2 class="text-2xl font-extrabold text-white tracking-tight">Sign In to DreamVids</h2>
+          <p class="text-xs text-gray-400 mt-1.5">You only need to sign in once. Free access to top AI video models.</p>
+        </div>
+
+        <!-- 1-Click Quick Demo Sign In -->
+        <button onclick="handleQuickGoogleAuth()" class="w-full py-2.5 px-4 mb-4 rounded-xl bg-dark-800 hover:bg-dark-700 border border-white/10 text-white text-xs font-semibold transition flex items-center justify-center gap-3 shadow-md">
+          <svg class="w-4 h-4" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          Continue with Google (Demo)
+        </button>
+
+        <div class="flex items-center my-4">
+          <div class="flex-grow border-t border-white/10"></div>
+          <span class="px-2.5 text-[10px] text-gray-500 uppercase tracking-widest font-mono">or continue with email</span>
+          <div class="flex-grow border-t border-white/10"></div>
+        </div>
+
+        <form onsubmit="handleEmailAuth(event)" class="space-y-3.5">
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Your Name</label>
+            <div class="relative">
+              <i data-lucide="user" class="w-4 h-4 absolute left-3.5 top-3 text-gray-500"></i>
+              <input type="text" id="regName" required placeholder="Alex Dreamer" class="glass-input w-full rounded-xl py-2 pl-10 pr-3 text-xs text-white placeholder-gray-500">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-semibold text-gray-300 mb-1">Email Address</label>
+            <div class="relative">
+              <i data-lucide="mail" class="w-4 h-4 absolute left-3.5 top-3 text-gray-500"></i>
+              <input type="email" id="regEmail" required placeholder="creator@studio.com" class="glass-input w-full rounded-xl py-2 pl-10 pr-3 text-xs text-white placeholder-gray-500">
+            </div>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit" class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 via-pink-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-bold text-xs shadow-lg shadow-purple-600/30 transition transform active:scale-[0.98] flex items-center justify-center gap-2">
+              <i data-lucide="arrow-right" class="w-4 h-4"></i> Enter Studio
+            </button>
+          </div>
+        </form>
+
+        <p class="text-[11px] text-gray-500 text-center mt-4">
+          Saved locally in your browser. Delete anytime from settings.
+        </p>
+      </div>
+    </div>
+
+    <!-- MAIN STUDIO DASHBOARD -->
+    <div id="studioScreen" class="hidden space-y-7">
+      
+      <!-- YOUTUBE SUBSCRIPTION GATE BANNER -->
+      <section id="channelGateBanner" class="rounded-3xl p-5 sm:p-7 relative overflow-hidden transition-all duration-300 glass-card-glow">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+          <div class="flex flex-col sm:flex-row items-center gap-5 text-center sm:text-left">
+            
+            <!-- Clickable Channel Logo: stealth subscribe action without exposing raw URL -->
+            <button type="button" onclick="triggerChannelSubscribe()" class="group cursor-pointer border-none bg-transparent p-0 text-left focus:outline-none shrink-0" title="Click Channel Logo to Subscribe">
+              <div class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-red-600 via-pink-600 to-purple-600 p-0.5 shadow-xl shadow-red-600/30 group-hover:scale-105 transition transform">
+                <div class="w-full h-full bg-dark-900 rounded-[14px] flex flex-col items-center justify-center p-1 relative">
+                  <div class="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center text-white mb-0.5 shadow-md shadow-red-600/50 group-hover:bg-red-500 transition">
+                    <i data-lucide="youtube" class="w-4 h-4 fill-white"></i>
+                  </div>
+                  <span class="text-[8px] font-black uppercase tracking-wider text-red-400">Subscribe</span>
+                </div>
+              </div>
+            </button>
+
+            <div>
+              <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase mb-1.5" id="channelStatusTag">
+                <span class="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse"></span>
+                <span>Subscription Required to Unlock All Generators</span>
+              </div>
+              <h3 class="text-lg sm:text-xl font-extrabold text-white tracking-tight" id="channelGateTitle">
+                Subscribe to Channel to Unlock Free AI Video Access
+              </h3>
+              <p class="text-xs text-gray-300 max-w-xl mt-1 leading-relaxed" id="channelGateDesc">
+                Click our channel logo or the button on the right to subscribe. It unlocks instant access to all top free AI video generators with prompt synchronization.
+              </p>
+            </div>
+          </div>
+
+          <div class="w-full md:w-auto flex flex-col items-center md:items-end gap-1.5">
+            <button id="gateActionBtn" onclick="triggerChannelSubscribe()" class="w-full md:w-auto py-2.5 px-6 rounded-2xl bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white font-bold text-xs shadow-lg shadow-red-600/30 flex items-center justify-center gap-2.5 transition active:scale-95">
+              <i data-lucide="youtube" class="w-4 h-4 fill-white"></i>
+              <span id="gateActionText">Click to Subscribe & Unlock</span>
+            </button>
+            <span id="gateActionSubtext" class="text-[10px] text-gray-400">Opens channel in a new tab</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROMPT ASSISTANT WORKBENCH -->
+      <section class="glass-card rounded-3xl p-5 sm:p-7 shadow-xl border border-white/10 relative">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 class="text-base font-bold text-white flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i> AI Video Prompt Assistant
+            </h3>
+            <p class="text-xs text-gray-400 mt-0.5">Write your vision. Clicking any unlocked AI video platform will copy this prompt and open the site instantly!</p>
+          </div>
+          <button type="button" onclick="insertRandomPrompt()" class="self-start sm:self-auto text-xs px-3 py-1.5 rounded-xl bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 border border-purple-500/30 flex items-center gap-1.5 font-medium transition">
+            <i data-lucide="shuffle" class="w-3.5 h-3.5"></i> Surprise Prompt
+          </button>
+        </div>
+
+        <div class="relative">
+          <textarea id="promptMaster" rows="2" class="glass-input w-full rounded-2xl p-3.5 text-xs text-white placeholder-gray-500 focus:outline-none resize-none custom-scroll" placeholder="Type what you want the AI video to generate (e.g. Ultra realistic cinematic drone hyperlapse of neon cyberpunk metropolis in rain, 4k 60fps)..."></textarea>
+        </div>
+
+        <!-- Quick Style and Aspect Ratio Preset Tags -->
+        <div class="flex flex-wrap items-center gap-2 mt-3 pt-3 border-t border-white/5">
+          <span class="text-[10px] uppercase font-bold text-gray-500 tracking-wider font-mono">Quick Styles:</span>
+          <button onclick="appendStyleTag('cinematic 8k hyperrealistic lighting, 35mm lens')" class="text-[11px] px-2.5 py-1 rounded-lg bg-dark-850 hover:bg-dark-800 border border-white/5 text-gray-300 transition">+ Cinematic 8K</button>
+          <button onclick="appendStyleTag('smooth slow-motion dynamic camera panning')" class="text-[11px] px-2.5 py-1 rounded-lg bg-dark-850 hover:bg-dark-800 border border-white/5 text-gray-300 transition">+ Smooth Pan</button>
+          <button onclick="appendStyleTag('cyberpunk synthwave neon atmosphere')" class="text-[11px] px-2.5 py-1 rounded-lg bg-dark-850 hover:bg-dark-800 border border-white/5 text-gray-300 transition">+ Cyberpunk</button>
+          <button onclick="appendStyleTag('epic anime aesthetic vibrant colors')" class="text-[11px] px-2.5 py-1 rounded-lg bg-dark-850 hover:bg-dark-800 border border-white/5 text-gray-300 transition">+ Anime</button>
+          <span class="text-[10px] uppercase font-bold text-gray-500 tracking-wider font-mono ml-2">Aspect:</span>
+          <button onclick="appendStyleTag('--ar 16:9 widescreen')" class="text-[11px] px-2.5 py-1 rounded-lg bg-dark-850 hover:bg-dark-800 border border-white/5 text-purple-300 transition">16:9</button>
+          <button onclick="appendStyleTag('--ar 9:16 vertical TikTok')" class="text-[11px] px-2.5 py-1 rounded-lg bg-dark-850 hover:bg-dark-800 border border-white/5 text-pink-300 transition">9:16 Shorts</button>
+        </div>
+      </section>
+
+
+      <!-- TOP FREE AI VIDEO GENERATORS GALLERY -->
+      <section class="space-y-4">
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="text-lg font-bold text-white tracking-tight flex items-center gap-2">
+              <i data-lucide="clapperboard" class="w-5 h-5 text-purple-400"></i> Free AI Video Generators
+            </h3>
+            <p class="text-xs text-gray-400">Click any engine to copy your prompt and launch the site directly.</p>
+          </div>
+          <span class="text-xs font-mono font-bold px-2.5 py-1 rounded-full bg-dark-850 border border-white/10 text-purple-300">
+            6 Engines Integrated
+          </span>
+        </div>
+
+        <!-- Generator Cards Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="generatorsGrid">
+          <!-- Populated by JavaScript -->
+        </div>
+      </section>
+
+    </div>
+
+  </main>
+
+
+  <!-- Footer -->
+  <footer class="relative z-10 border-t border-white/5 py-6 px-4 bg-dark-950/80 backdrop-blur-md text-xs text-gray-400">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-2">
+        <span class="text-white font-bold">DreamVids AI Video Hub</span>
+        <span>• Subscriber Free Video Portal</span>
+      </div>
+      <div class="flex items-center gap-6">
+        <button onclick="triggerChannelSubscribe()" class="text-red-400 hover:text-red-300 font-medium flex items-center gap-1.5 transition">
+          <i data-lucide="youtube" class="w-4 h-4 fill-red-500"></i> YouTube Channel
+        </button>
+        <button onclick="toggleUserModal(true)" class="hover:text-white transition flex items-center gap-1">
+          <i data-lucide="settings" class="w-3.5 h-3.5"></i> Account & Privacy
+        </button>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Hidden target channel URL (Raw link is never printed to the DOM)
+    const SECRET_CHANNEL_LINK = "https://www.youtube.com/@dreamersaffiliate7739?sub_confirmation=1";
+    const STORAGE_KEY = "dreamvids_hub_user";
+
+    // Verified Free AI Video Platforms
+    const AI_VIDEO_PLATFORMS = [
+      {
+        id: "luma",
+        name: "Luma Dream Machine",
+        tagline: "High-Fidelity 3D Camera Movements & Ultra Realism",
+        url: "https://lumalabs.ai/dream-machine",
+        freeTier: "Generous Free Tier",
+        tierColor: "text-purple-400 bg-purple-500/10 border-purple-500/30",
+        bestFor: "Photorealistic camera zooms & smooth motion",
+        icon: "video"
+      },
+      {
+        id: "kling",
+        name: "Kling AI",
+        tagline: "State-of-the-Art Motion Simulation & 1080p Generation",
+        url: "https://klingai.com",
+        freeTier: "Daily Free Credits",
+        tierColor: "text-pink-400 bg-pink-500/10 border-pink-500/30",
+        bestFor: "Complex physics, cinematic scenes & characters",
+        icon: "sparkles"
+      },
+      {
+        id: "pika",
+        name: "Pika Art",
+        tagline: "Idea-to-Video Animation, Lip Sync & Style Modification",
+        url: "https://pika.art",
+        freeTier: "Free Monthly Allowance",
+        tierColor: "text-cyan-400 bg-cyan-500/10 border-cyan-500/30",
+        bestFor: "Creative animation, anime & object transformations",
+        icon: "film"
+      },
+      {
+        id: "haiper",
+        name: "Haiper AI",
+        tagline: "Perceptual Foundation Models for AI Video Creation",
+        url: "https://haiper.ai",
+        freeTier: "Free Standard Generations",
+        tierColor: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+        bestFor: "Quick short loops, stylized animations & repainting",
+        icon: "play-circle"
+      },
+      {
+        id: "runway",
+        name: "RunwayML (Gen-2)",
+        tagline: "Industry Standard Video Diffusion Engine",
+        url: "https://runwayml.com",
+        freeTier: "Free Starter Access",
+        tierColor: "text-amber-400 bg-amber-500/10 border-amber-500/30",
+        bestFor: "Cinematic directors, frame interpolation & motion brush",
+        icon: "clapperboard"
+      },
+      {
+        id: "pollinations",
+        name: "Pollinations AI",
+        tagline: "Open-Source Instant Web Video Generator",
+        url: "https://pollinations.ai",
+        freeTier: "100% Free Open Web Access",
+        tierColor: "text-blue-400 bg-blue-500/10 border-blue-500/30",
+        bestFor: "Instant generation without signups or queues",
+        icon: "globe"
+      }
+    ];
+
+    const RANDOM_PROMPTS = [
+      "Cinematic hyperlapse flying through a futuristic neo-cyberpunk Tokyo in twilight rain, reflection on asphalt, 8k resolution.",
+      "A majestic crystalline cosmic portal spinning slowly over violet glacial mountain peaks with aurora borealis.",
+      "Hyper-detailed macro cinematic shot of a cybernetic mechanical dragon heart pulsating with glowing blue plasma.",
+      "An ethereal underwater coral city illuminated by glowing bioluminescent deep-sea jellyfish and golden rays of light."
+    ];
+
+    let currentUser = null;
+
+    function initApp() {
+      // Load user session from localStorage
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored) {
+          currentUser = JSON.parse(stored);
+        }
+      } catch (err) {
+        currentUser = null;
+      }
+
+      refreshUI();
+      renderGeneratorsGrid();
+      if (window.lucide) lucide.createIcons();
+    }
+
+    // Auth Handlers: Sign in once
+    function handleQuickGoogleAuth() {
+      currentUser = {
+        name: "Creator Pass User",
+        email: "creator.pass@gmail.com",
+        isSubscribed: false,
+        freeQuota: 1,
+        created: Date.now()
+      };
+      saveUser();
+      refreshUI();
+      renderGeneratorsGrid();
+      showToast("Signed in successfully! Click the YouTube logo to unlock the generators.", "info");
+    }
+
+    function handleEmailAuth(e) {
+      e.preventDefault();
+      const name = document.getElementById("regName").value.trim();
+      const email = document.getElementById("regEmail").value.trim();
+
+      if (!name || !email) {
+        showToast("Please enter both your name and email.", "error");
+        return;
+      }
+
+      currentUser = {
+        name: name,
+        email: email,
+        isSubscribed: false,
+        freeQuota: 1,
+        created: Date.now()
+      };
+      saveUser();
+      refreshUI();
+      renderGeneratorsGrid();
+      showToast(`Welcome, ${name}! Click the YouTube logo to unlock the tools.`, "info");
+    }
+
+    function saveUser() {
+      if (currentUser) {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(currentUser));
+      }
+    }
+
+    // Stealth YouTube Subscription Trigger (Never prints raw URL on screen)
+    function triggerChannelSubscribe() {
+      window.open(SECRET_CHANNEL_LINK, "_blank", "noopener,noreferrer");
+
+      if (currentUser) {
+        currentUser.isSubscribed = true;
+        saveUser();
+        refreshUI();
+        renderGeneratorsGrid();
+        showToast("Channel subscription confirmed! All generators are now unlocked.", "success");
+      } else {
+        showToast("Channel opened! Please sign in to activate your access.", "info");
+      }
+    }
+
+    function refreshUI() {
+      const authScreen = document.getElementById("authScreen");
+      const studioScreen = document.getElementById("studioScreen");
+      const headerAuthSlot = document.getElementById("headerAuthSlot");
+      const creditPill = document.getElementById("creditPill");
+      const creditDot = document.getElementById("creditDot");
+      const creditBadgeNumber = document.getElementById("creditBadgeNumber");
+
+      if (!currentUser) {
+        authScreen.classList.remove("hidden");
+        studioScreen.classList.add("hidden");
+        creditPill.classList.add("hidden");
+        headerAuthSlot.innerHTML = `
+          <div class="text-xs text-gray-400 font-semibold flex items-center gap-1.5">
+            <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> Sign In Required
+          </div>
+        `;
+      } else {
+        authScreen.classList.add("hidden");
+        studioScreen.classList.remove("hidden");
+        creditPill.classList.remove("hidden");
+        creditPill.classList.add("flex");
+
+        // Credit Badge
+        if (currentUser.isSubscribed) {
+          creditDot.className = "w-2 h-2 rounded-full bg-emerald-400 animate-pulse";
+          creditBadgeNumber.className = "text-emerald-400 font-bold font-mono";
+          creditBadgeNumber.textContent = currentUser.freeQuota > 0 ? "1/1 Free Pass Active" : "0/1 (Pass Used)";
+        } else {
+          creditDot.className = "w-2 h-2 rounded-full bg-red-400 animate-pulse";
+          creditBadgeNumber.className = "text-red-400 font-bold font-mono";
+          creditBadgeNumber.textContent = "Subscribe to Unlock";
+        }
+
+        // Header User Button
+        headerAuthSlot.innerHTML = `
+          <button onclick="toggleUserModal(true)" class="flex items-center gap-2 p-1.5 pr-3 rounded-xl bg-dark-850 hover:bg-dark-800 border border-white/10 text-xs text-white transition">
+            <div class="w-6 h-6 rounded-lg bg-gradient-to-tr from-purple-600 to-pink-600 flex items-center justify-center font-bold text-[11px] text-white">
+              ${currentUser.name.charAt(0).toUpperCase()}
+            </div>
+            <span class="max-w-[110px] truncate hidden sm:inline">${currentUser.name}</span>
+            <i data-lucide="chevron-down" class="w-3.5 h-3.5 text-gray-400"></i>
+          </button>
+        `;
+
+        // Update Subscription Banner
+        const banner = document.getElementById("channelGateBanner");
+        const statusTag = document.getElementById("channelStatusTag");
+        const gateTitle = document.getElementById("channelGateTitle");
+        const gateDesc = document.getElementById("channelGateDesc");
+        const gateActionBtn = document.getElementById("gateActionBtn");
+        const gateActionText = document.getElementById("gateActionText");
+        const gateActionSubtext = document.getElementById("gateActionSubtext");
+
+        if (currentUser.isSubscribed) {
+          banner.className = "rounded-3xl p-5 sm:p-7 relative overflow-hidden transition-all duration-300 glass-card-unlocked";
+          statusTag.className = "inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 mb-1.5";
+          statusTag.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span>Channel Verified & Unlocked</span>`;
+          gateTitle.textContent = "All Free AI Video Generators Unlocked";
+          gateDesc.textContent = "Thank you for subscribing to our YouTube channel! You now have direct access to all top AI video platforms with automatic prompt copy.";
+          gateActionBtn.className = "w-full md:w-auto py-2.5 px-6 rounded-2xl bg-dark-850 hover:bg-dark-800 text-gray-200 border border-white/10 font-bold text-xs flex items-center justify-center gap-2.5 transition";
+          gateActionText.textContent = "Visit YouTube Channel";
+          gateActionSubtext.textContent = "Channel membership verified";
+        } else {
+          banner.className = "rounded-3xl p-5 sm:p-7 relative overflow-hidden transition-all duration-300 glass-card-glow";
+          statusTag.className = "inline-flex items-center gap-2 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase bg-red-500/10 text-red-400 border border-red-500/25 mb-1.5";
+          statusTag.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse"></span><span>Subscription Required to Unlock All Generators</span>`;
+          gateTitle.textContent = "Subscribe to Channel to Unlock Free AI Video Access";
+          gateDesc.textContent = "Click our channel logo or the button on the right to subscribe. It unlocks instant access to all top free AI video generators with prompt synchronization.";
+          gateActionBtn.className = "w-full md:w-auto py-2.5 px-6 rounded-2xl bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-500 hover:to-pink-500 text-white font-bold text-xs shadow-lg shadow-red-600/30 flex items-center justify-center gap-2.5 transition active:scale-95";
+          gateActionText.textContent = "Click to Subscribe & Unlock";
+          gateActionSubtext.textContent = "Opens channel in a new tab";
+        }
+
+        // Modal profile info
+        document.getElementById("modalUserName").textContent = currentUser.name;
+        document.getElementById("modalUserEmail").textContent = currentUser.email;
+        document.getElementById("modalAvatarLetter").textContent = currentUser.name.charAt(0).toUpperCase();
+        document.getElementById("modalQuotaText").textContent = `${currentUser.freeQuota} / 1 Generation Remaining`;
+        
+        const subTag = document.getElementById("modalSubscribedTag");
+        const subStatus = document.getElementById("modalSubStatus");
+        if (currentUser.isSubscribed) {
+          subTag.className = "font-semibold text-emerald-400 flex items-center gap-1";
+          subTag.innerHTML = `<i data-lucide="check" class="w-3.5 h-3.5"></i> Subscribed & Unlocked`;
+          subStatus.className = "inline-flex items-center gap-1 text-[11px] text-emerald-400 font-semibold mt-1";
+          subStatus.innerHTML = `<i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Verified Channel Subscriber`;
+        } else {
+          subTag.className = "font-semibold text-red-400 flex items-center gap-1";
+          subTag.innerHTML = `<i data-lucide="x" class="w-3.5 h-3.5"></i> Not Subscribed`;
+          subStatus.className = "inline-flex items-center gap-1 text-[11px] text-amber-400 font-semibold mt-1";
+          subStatus.innerHTML = `<i data-lucide="lock" class="w-3.5 h-3.5"></i> Pending Channel Subscription`;
+        }
+      }
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function renderGeneratorsGrid() {
+      const container = document.getElementById("generatorsGrid");
+      if (!container) return;
+
+      const isSubscribed = currentUser && currentUser.isSubscribed;
+
+      container.innerHTML = AI_VIDEO_PLATFORMS.map(platform => {
+        return `
+          <div class="glass-card rounded-2xl p-5 flex flex-col justify-between transition-all duration-300 relative group overflow-hidden ${isSubscribed ? 'hover:border-purple-500/50 hover:shadow-xl hover:shadow-purple-500/10' : 'border-white/5 opacity-85'}">
+            
+            ${!isSubscribed ? `
+              <div class="absolute inset-0 bg-dark-950/70 backdrop-blur-[2px] z-10 flex flex-col items-center justify-center p-4 text-center">
+                <div class="w-9 h-9 rounded-xl bg-dark-800 border border-white/10 text-amber-400 flex items-center justify-center mb-2 shadow">
+                  <i data-lucide="lock" class="w-4 h-4"></i>
+                </div>
+                <p class="text-xs font-bold text-white mb-0.5">Locked Generator</p>
+                <p class="text-[11px] text-gray-400 mb-3 max-w-xs">Subscribe to our channel to unlock this AI video model.</p>
+                <button onclick="triggerChannelSubscribe()" class="py-1.5 px-3 rounded-lg bg-red-600 hover:bg-red-500 text-white text-[11px] font-bold flex items-center gap-1.5 transition shadow-md shadow-red-600/30">
+                  <i data-lucide="youtube" class="w-3.5 h-3.5 fill-white"></i>
+                  <span>Click Logo Above or Here</span>
+                </button>
+              </div>
+            ` : ''}
+
+            <div>
+              <div class="flex items-center justify-between gap-2 mb-2.5">
+                <span class="text-sm font-bold text-white flex items-center gap-2">
+                  <i data-lucide="${platform.icon}" class="w-4 h-4 text-purple-400"></i> ${platform.name}
+                </span>
+                <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-full border ${platform.tierColor}">
+                  ${platform.freeTier}
+                </span>
+              </div>
+
+              <p class="text-xs text-gray-300 leading-relaxed mb-3">${platform.tagline}</p>
+
+              <div class="bg-dark-850 p-2.5 rounded-xl border border-white/5 mb-4 text-[11px] text-gray-400">
+                <span class="text-gray-300 font-semibold">Best for:</span> ${platform.bestFor}
+              </div>
+            </div>
+
+            <!-- Launch Button -->
+            <button onclick="launchGeneratorPlatform('${platform.id}')" ${!isSubscribed ? 'disabled' : ''} class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white shadow-lg shadow-purple-600/25 text-xs font-bold flex items-center justify-center gap-2 transition active:scale-98 disabled:opacity-30">
+              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+              <span>Launch & Copy Prompt</span>
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      if (window.lucide) lucide.createIcons();
+    }
+
+    function launchGeneratorPlatform(platformId) {
+      if (!currentUser || !currentUser.isSubscribed) {
+        showToast("Please subscribe to the YouTube channel to unlock this tool.", "error");
+        return;
+      }
+
+      const platform = AI_VIDEO_PLATFORMS.find(p => p.id === platformId);
+      if (!platform) return;
+
+      // Copy Prompt to Clipboard
+      const currentPrompt = document.getElementById("promptMaster").value.trim() || "Ultra realistic cinematic 8k video in cyberpunk lighting";
+      copyToClipboard(currentPrompt);
+
+      // Decrement free quota on first use if available
+      if (currentUser.freeQuota > 0) {
+        currentUser.freeQuota = 0;
+        saveUser();
+        refreshUI();
+      }
+
+      // Open Target Website in a new tab
+      window.open(platform.url, "_blank", "noopener,noreferrer");
+      showToast(`Prompt copied to clipboard! Opening ${platform.name}...`, "success");
+    }
+
+    function insertRandomPrompt() {
+      const p = RANDOM_PROMPTS[Math.floor(Math.random() * RANDOM_PROMPTS.length)];
+      document.getElementById("promptMaster").value = p;
+    }
+
+    function appendStyleTag(tag) {
+      const area = document.getElementById("promptMaster");
+      if (!area.value.trim()) {
+        area.value = tag;
+      } else {
+        area.value = area.value.trim() + ", " + tag;
+      }
+    }
+
+    function copyToClipboard(text) {
+      const temp = document.createElement("textarea");
+      temp.value = text;
+      document.body.appendChild(temp);
+      temp.select();
+      document.execCommand("copy");
+      document.body.removeChild(temp);
+    }
+
+    // Modal & Account Deletion Handlers
+    function toggleUserModal(show) {
+      const modal = document.getElementById("userModal");
+      if (show) {
+        modal.classList.remove("hidden");
+        setTimeout(() => modal.classList.remove("opacity-0"), 10);
+      } else {
+        modal.classList.add("opacity-0");
+        setTimeout(() => modal.classList.add("hidden"), 200);
+      }
+    }
+
+    function promptDeleteAccount() {
+      toggleUserModal(false);
+      toggleDeleteConfirm(true);
+    }
+
+    function toggleDeleteConfirm(show) {
+      const modal = document.getElementById("deleteConfirmDialog");
+      if (show) {
+        modal.classList.remove("hidden");
+        setTimeout(() => modal.classList.remove("opacity-0"), 10);
+      } else {
+        modal.classList.add("opacity-0");
+        setTimeout(() => modal.classList.add("hidden"), 200);
+      }
+    }
+
+    function performFullAccountDeletion() {
+      toggleDeleteConfirm(false);
+      currentUser = null;
+      localStorage.removeItem(STORAGE_KEY);
+      refreshUI();
+      renderGeneratorsGrid();
+      showToast("Your account and session data have been permanently wiped.", "info");
+    }
+
+    function showToast(message, type = "info") {
+      const zone = document.getElementById("toastZone");
+      const toast = document.createElement("div");
+
+      let border = "border-purple-500/40 text-purple-200 bg-dark-900/95";
+      let icon = "info";
+
+      if (type === "success") {
+        border = "border-emerald-500/40 text-emerald-200 bg-dark-900/95";
+        icon = "check-circle";
+      } else if (type === "error") {
+        border = "border-red-500/40 text-red-200 bg-dark-900/95";
+        icon = "alert-circle";
+      }
+
+      toast.className = `p-3.5 rounded-2xl border backdrop-blur-xl shadow-2xl flex items-center gap-3 text-xs font-semibold pointer-events-auto transform transition-all duration-300 translate-x-12 opacity-0 ${border}`;
+      toast.innerHTML = `
+        <i data-lucide="${icon}" class="w-4 h-4 shrink-0"></i>
+        <span class="flex-1">${message}</span>
+      `;
+
+      zone.appendChild(toast);
+      if (window.lucide) lucide.createIcons();
+
+      setTimeout(() => toast.classList.remove("translate-x-12", "opacity-0"), 10);
+      setTimeout(() => {
+        toast.classList.add("translate-x-12", "opacity-0");
+        setTimeout(() => toast.remove(), 300);
+      }, 4200);
+    }
+
+    window.addEventListener("DOMContentLoaded", initApp);
+  </script>
+</body>
+</html>
